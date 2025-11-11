@@ -223,13 +223,21 @@ export const emailResults = asyncHandler(async (req: Request, res: Response) => 
     }
   }
 
-  // Send email
-  await sendResultsEmail(evaluation, pdfBuffer);
-
-  res.status(200).json({
-    success: true,
-    message: 'Results emailed successfully'
-  });
+  // Send email (handle failures gracefully)
+  try {
+    await sendResultsEmail(evaluation, pdfBuffer);
+    res.status(200).json({
+      success: true,
+      message: 'Results emailed successfully'
+    });
+  } catch (emailError) {
+    logger.error('Email send failed but evaluation was saved:', emailError);
+    res.status(200).json({
+      success: true,
+      message: 'Evaluation completed successfully. Email service is currently unavailable.',
+      warning: 'Email could not be sent at this time. Please try downloading the PDF instead.'
+    });
+  }
 });
 
 /**

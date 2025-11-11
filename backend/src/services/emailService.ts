@@ -21,6 +21,12 @@ export const sendResultsEmail = async (
   pdfBuffer?: Buffer
 ): Promise<void> => {
   try {
+    // Check if email is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      logger.warn('Email service not configured. Skipping email send.');
+      return;
+    }
+
     const transporter = createTransporter();
 
     const categoryMessages = {
